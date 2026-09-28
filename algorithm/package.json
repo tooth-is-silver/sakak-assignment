@@ -2,8 +2,9 @@
   "name": "algorithm",
   "private": true,
   "scripts": {
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "type": "module",
   "devDependencies": {
@@ -11,6 +12,7 @@
     "@types/node": "^26.6.3",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.70.1",

@@ -5,9 +5,15 @@
     "algorithm",
     "web"
   ],
+  "format": "prettier --write .",
+  "format:check": "prettier --check .",
   "scripts": {
     "dev": "npm run dev --workspace web",
     "build": "npm run build --workspace web",
-    "test": "npm test --workspaces"
+    "test": "npm test --workspaces",
+    "test:algorithm": "npm test -w algorithm",
+    "test:web": "npm test -w web",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
   }
 }

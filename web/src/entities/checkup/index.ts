@@ -1,4 +1,9 @@
-export { requestAuthentication, requestCheckupResult } from './api/checkup';
+export {
+  useAuthenticationMutation,
+  useCheckupResultMutation,
+  useCancelAuthenticationMutation,
+} from './api/mutations';
+export { requestAuthentication, requestCheckupResult, cancelAuthentication } from './api/checkup';
 export {
   firstRequestSchema,
   secondRequestSchema,

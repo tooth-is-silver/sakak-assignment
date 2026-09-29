@@ -11,7 +11,7 @@ const CHECKUP_PROXY_URL = '/api/checkup';
 const MOCK_FIRST_URL = '/mock/first.json';
 const MOCK_SECOND_URL = '/mock/second.json';
 
-async function postCheckup(body: unknown, mockUrl: string, signal: AbortSignal) {
+async function postCheckup(body: unknown, mockUrl: string, signal?: AbortSignal) {
   const response = shouldUseMock
     ? await fetch(mockUrl, { signal })
     : await fetch(CHECKUP_PROXY_URL, {
@@ -27,7 +27,7 @@ async function postCheckup(body: unknown, mockUrl: string, signal: AbortSignal) 
 /** 1차 요청. 응답을 받으면 사용자 휴대폰으로 간편인증이 발송된 상태가 된다. */
 export async function requestAuthentication(
   request: FirstRequest,
-  signal: AbortSignal,
+  signal?: AbortSignal,
 ): Promise<MultiFactorInfo> {
   const parsed = firstResponseSchema.safeParse(await postCheckup(request, MOCK_FIRST_URL, signal));
 
@@ -48,7 +48,7 @@ export async function requestAuthentication(
 export async function requestCheckupResult(
   request: FirstRequest,
   multiFactorInfo: MultiFactorInfo,
-  signal: AbortSignal,
+  signal?: AbortSignal,
 ): Promise<CheckupData> {
   const body = { ...request, isContinue: '1', multiFactorInfo };
   const parsed = secondResponseSchema.safeParse(await postCheckup(body, MOCK_SECOND_URL, signal));
@@ -61,4 +61,15 @@ export async function requestCheckupResult(
   }
 
   return parsed.data.data;
+}
+
+/**
+ * 인증 대기를 중단한다.
+ * 브라우저 요청만 끊으면 CANDiY는 대기 상태를 유지하므로 중단을 명시적으로 알려야 한다.
+ */
+export async function cancelAuthentication(
+  request: FirstRequest,
+  multiFactorInfo: MultiFactorInfo,
+): Promise<void> {
+  await postCheckup({ ...request, isContinue: '0', multiFactorInfo }, MOCK_SECOND_URL);
 }

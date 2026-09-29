@@ -108,6 +108,12 @@ export const secondResponseSchema = z.discriminatedUnion('status', [
   errorResponseSchema,
 ]);
 
+/** 취소 성공 시 data 계약은 확인되지 않아 공통 상태코드만 검증한다. */
+export const cancellationResponseSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('success') }),
+  errorResponseSchema,
+]);
+
 export type FirstRequest = z.infer<typeof firstRequestSchema>;
 export type MultiFactorInfo = z.infer<typeof multiFactorInfoSchema>;
 export type CheckupOverview = z.infer<typeof checkupOverviewSchema>;

@@ -1,5 +1,6 @@
 import { CandiyRequestError, shouldUseMock } from '@/shared/api';
 import {
+  cancellationResponseSchema,
   firstResponseSchema,
   secondResponseSchema,
   type CheckupData,
@@ -71,5 +72,14 @@ export async function cancelAuthentication(
   request: FirstRequest,
   multiFactorInfo: MultiFactorInfo,
 ): Promise<void> {
-  await postCheckup({ ...request, isContinue: '0', multiFactorInfo }, MOCK_SECOND_URL);
+  const parsed = cancellationResponseSchema.safeParse(
+    await postCheckup({ ...request, isContinue: '0', multiFactorInfo }, MOCK_SECOND_URL),
+  );
+
+  if (!parsed.success) {
+    throw new Error('인증 취소 응답 형태가 계약과 다릅니다');
+  }
+  if (parsed.data.status === 'error') {
+    throw new CandiyRequestError(parsed.data.code, parsed.data.message);
+  }
 }

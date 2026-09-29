@@ -46,6 +46,12 @@ const PROTEINURIA_REFERENCES = [
   { ...createReference('질환의심', ''), proteinuria: '양성(+1)이상' },
 ];
 
+const CHEST_XRAY_REFERENCES = [
+  { ...createReference('정상(A)', ''), chestXrayResult: '정상, 비활동성' },
+  { ...createReference('정상(B)', ''), chestXrayResult: '' },
+  { ...createReference('질환의심', ''), chestXrayResult: '정상 및 비활동성이외의자' },
+];
+
 describe('검진 수치 상태 판정', () => {
   test.each([
     ['정상 범위', '22', 'normal'],
@@ -144,5 +150,41 @@ describe('요단백 상태 판정 회귀', () => {
     expect(determineCheckupStatus(measurement, 'proteinuria', PROTEINURIA_REFERENCES)).toBe(
       'unknown',
     );
+  });
+});
+
+describe('흉부 X선 상태 판정 회귀', () => {
+  test.each(['정상', '비활동성'])('%s은 정상으로 판정한다', (measurement) => {
+    expect(determineCheckupStatus(measurement, 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe(
+      'normal',
+    );
+  });
+
+  test.each(['폐결핵 의심', '기타 흉부질환'])('%s은 위험으로 판정한다', (measurement) => {
+    expect(determineCheckupStatus(measurement, 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe(
+      'risk',
+    );
+  });
+
+  test('빈 값은 판정 불가다', () => {
+    expect(determineCheckupStatus('', 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe('unknown');
+  });
+
+  test('질환의심 기준 문구가 달라지면 추측하지 않는다', () => {
+    const references = [
+      { ...createReference('정상(A)', ''), chestXrayResult: '정상, 비활동성' },
+      { ...createReference('질환의심', ''), chestXrayResult: '그 외' },
+    ];
+
+    expect(determineCheckupStatus('폐결핵 의심', 'chestXrayResult', references)).toBe('unknown');
+  });
+
+  test('정상 기준이 비어 있으면 추측하지 않는다', () => {
+    const references = [
+      { ...createReference('정상(A)', ''), chestXrayResult: '' },
+      { ...createReference('질환의심', ''), chestXrayResult: '정상 및 비활동성이외의자' },
+    ];
+
+    expect(determineCheckupStatus('폐결핵 의심', 'chestXrayResult', references)).toBe('unknown');
   });
 });

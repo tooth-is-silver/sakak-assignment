@@ -99,6 +99,32 @@ function determineProteinuriaStatus(
   return 'unknown';
 }
 
+function determineChestXrayStatus(
+  measurement: string,
+  referenceList: CheckupReference[],
+): CheckupStatus {
+  const normalizedMeasurement = measurement.trim();
+  if (normalizedMeasurement === '') {
+    return 'unknown';
+  }
+
+  const normalReference = referenceList.find((item) => item.refType === '정상(A)');
+  const riskReference = referenceList.find((item) => item.refType === '질환의심');
+  if (!normalReference || riskReference?.chestXrayResult !== '정상 및 비활동성이외의자') {
+    return 'unknown';
+  }
+
+  const normalResults = normalReference.chestXrayResult
+    .split(',')
+    .map((result) => result.trim())
+    .filter((result) => result !== '');
+  if (normalResults.length === 0) {
+    return 'unknown';
+  }
+
+  return normalResults.includes(normalizedMeasurement) ? 'normal' : 'risk';
+}
+
 /**
  * 검진 수치가 어느 단계에 해당하는지 판정한다.
  * 숫자 항목은 정상(A) -> 정상(B) -> 질환의심 순으로 맞춰보고 처음 맞는 단계를 쓴다.
@@ -118,6 +144,10 @@ export function determineCheckupStatus(
 
   if (field === 'proteinuria') {
     return determineProteinuriaStatus(measurement, referenceList);
+  }
+
+  if (field === 'chestXrayResult') {
+    return determineChestXrayStatus(measurement, referenceList);
   }
 
   const value = Number(measurement);

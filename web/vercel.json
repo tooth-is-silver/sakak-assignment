@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/checkup.ts": {
+      "maxDuration": 60
+    }
+  }
+}

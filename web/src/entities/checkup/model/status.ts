@@ -50,11 +50,48 @@ function determineBloodPressureStatus(
       bloodPressureReference.diastolic,
     );
 
-    if (bloodPressureReference.operator === 'and' && isSystolicMatch && isDiastolicMatch) {
+    const isMatchByOperator = {
+      and: isSystolicMatch && isDiastolicMatch,
+      or: isSystolicMatch || isDiastolicMatch,
+    };
+
+    if (isMatchByOperator[bloodPressureReference.operator]) {
+      return status;
+    }
+  }
+
+  return 'unknown';
+}
+
+function parsePositiveProteinuriaGrade(text: string): number | null {
+  const match = /^양성\(\+([1-9]\d*)\)(?:이상)?$/.exec(text.trim());
+  return match ? Number(match[1]) : null;
+}
+
+function determineProteinuriaStatus(
+  measurement: string,
+  referenceList: CheckupReference[],
+): CheckupStatus {
+  const normalizedMeasurement = measurement.trim();
+  if (normalizedMeasurement === '') {
+    return 'unknown';
+  }
+
+  for (const { refType, status } of STATUS_BY_REFERENCE_TYPE) {
+    const reference = referenceList.find((item) => item.refType === refType);
+    if (!reference) continue;
+
+    if (normalizedMeasurement === reference.proteinuria.trim()) {
       return status;
     }
 
-    if (bloodPressureReference.operator === 'or' && (isSystolicMatch || isDiastolicMatch)) {
+    const measurementGrade = parsePositiveProteinuriaGrade(normalizedMeasurement);
+    const referenceGrade = parsePositiveProteinuriaGrade(reference.proteinuria);
+    if (
+      measurementGrade !== null &&
+      referenceGrade !== null &&
+      measurementGrade >= referenceGrade
+    ) {
       return status;
     }
   }
@@ -77,6 +114,10 @@ export function determineCheckupStatus(
 ): CheckupStatus {
   if (field === 'bloodPressure') {
     return determineBloodPressureStatus(measurement, referenceList);
+  }
+
+  if (field === 'proteinuria') {
+    return determineProteinuriaStatus(measurement, referenceList);
   }
 
   const value = Number(measurement);

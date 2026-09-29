@@ -40,6 +40,12 @@ const BLOOD_PRESSURE_REFERENCES = [
   { ...createReference('질환의심', ''), bloodPressure: '140이상 또는 /90이상' },
 ];
 
+const PROTEINURIA_REFERENCES = [
+  { ...createReference('정상(A)', ''), proteinuria: '음성' },
+  { ...createReference('정상(B)', ''), proteinuria: '약양성±' },
+  { ...createReference('질환의심', ''), proteinuria: '양성(+1)이상' },
+];
+
 describe('검진 수치 상태 판정', () => {
   test.each([
     ['정상 범위', '22', 'normal'],
@@ -117,6 +123,25 @@ describe('혈압 상태 판정 회귀', () => {
 
   test.each(['', '120', '높음/낮음'])('%s는 판정 불가다', (measurement) => {
     expect(determineCheckupStatus(measurement, 'bloodPressure', BLOOD_PRESSURE_REFERENCES)).toBe(
+      'unknown',
+    );
+  });
+});
+
+describe('요단백 상태 판정 회귀', () => {
+  test.each([
+    ['음성', 'normal'],
+    ['약양성±', 'caution'],
+    ['양성(+1)', 'risk'],
+    ['양성(+3)', 'risk'],
+  ])('%s을 %s으로 판정한다', (measurement, expected) => {
+    expect(determineCheckupStatus(measurement, 'proteinuria', PROTEINURIA_REFERENCES)).toBe(
+      expected,
+    );
+  });
+
+  test.each(['', '양성', '+1', '미검사'])('%s은 판정 불가다', (measurement) => {
+    expect(determineCheckupStatus(measurement, 'proteinuria', PROTEINURIA_REFERENCES)).toBe(
       'unknown',
     );
   });

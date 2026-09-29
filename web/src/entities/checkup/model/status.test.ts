@@ -34,6 +34,12 @@ const BMI_REFERENCES = [
   createReference('질환의심', '30이상'),
 ];
 
+const BLOOD_PRESSURE_REFERENCES = [
+  { ...createReference('정상(A)', ''), bloodPressure: '120미만 이며/80미만' },
+  { ...createReference('정상(B)', ''), bloodPressure: '120-139 또는 /80-89' },
+  { ...createReference('질환의심', ''), bloodPressure: '140이상 또는 /90이상' },
+];
+
 describe('검진 수치 상태 판정', () => {
   test.each([
     ['정상 범위', '22', 'normal'],
@@ -87,5 +93,31 @@ describe('판정할 수 없는 값 회귀', () => {
 
   test('해당 단계의 기준이 없으면 판정 불가다', () => {
     expect(determineCheckupStatus('22', 'BMI', [])).toBe('unknown');
+  });
+});
+
+describe('혈압 상태 판정 회귀', () => {
+  test.each([
+    ['두 값이 모두 정상 기준을 충족', '93/67', 'normal'],
+    ['수축기만 주의 기준에 해당', '125/75', 'caution'],
+    ['이완기만 주의 기준에 해당', '115/85', 'caution'],
+    ['수축기만 위험 기준에 해당', '145/75', 'risk'],
+    ['이완기만 위험 기준에 해당', '115/95', 'risk'],
+  ])('%s하면 %s으로 판정한다', (_case, measurement, expected) => {
+    expect(determineCheckupStatus(measurement, 'bloodPressure', BLOOD_PRESSURE_REFERENCES)).toBe(
+      expected,
+    );
+  });
+
+  test('주의와 위험 조건이 동시에 맞으면 더 높은 위험으로 판정한다', () => {
+    expect(determineCheckupStatus('145/85', 'bloodPressure', BLOOD_PRESSURE_REFERENCES)).toBe(
+      'risk',
+    );
+  });
+
+  test.each(['', '120', '높음/낮음'])('%s는 판정 불가다', (measurement) => {
+    expect(determineCheckupStatus(measurement, 'bloodPressure', BLOOD_PRESSURE_REFERENCES)).toBe(
+      'unknown',
+    );
   });
 });

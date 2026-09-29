@@ -1,0 +1,1 @@
+export const shouldUseMock = import.meta.env.VITE_USE_MOCK === 'true';

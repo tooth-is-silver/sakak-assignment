@@ -1,3 +1,4 @@
+export { requestAuthentication, requestCheckupResult } from './api/checkup';
 export {
   firstRequestSchema,
   secondRequestSchema,

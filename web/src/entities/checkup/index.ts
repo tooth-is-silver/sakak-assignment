@@ -16,3 +16,4 @@ export {
   type CheckupOverview,
   type CheckupReference,
 } from './api/schema';
+export { parseNumericReference, type ReferenceRange } from './model/reference';

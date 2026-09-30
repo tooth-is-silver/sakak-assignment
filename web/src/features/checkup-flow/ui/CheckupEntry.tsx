@@ -1,8 +1,6 @@
-interface Props {
-  onStart: () => void;
-}
+import { Link } from 'react-router-dom';
 
-export function CheckupEntry({ onStart }: Props) {
+export function CheckupEntry() {
   return (
     <section
       aria-labelledby="checkup-entry-title"
@@ -25,13 +23,12 @@ export function CheckupEntry({ onStart }: Props) {
           <p className="mb-4 text-sm leading-6 text-slate-500">
             건강검진 내역 조회를 위해 본인 명의 휴대전화와 간편인증이 필요합니다.
           </p>
-          <button
-            type="button"
-            onClick={onStart}
-            className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 motion-reduce:transition-none sm:w-auto"
+          <Link
+            to="/checkup"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-teal-700 px-5 py-3 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 motion-reduce:transition-none sm:w-auto"
           >
             내역 조회 시작
-          </button>
+          </Link>
         </div>
       </div>
     </section>

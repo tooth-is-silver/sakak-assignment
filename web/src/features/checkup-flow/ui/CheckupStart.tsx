@@ -54,9 +54,14 @@ export function CheckupStart() {
               type="text"
               inputMode="numeric"
               autoComplete="bday"
+              maxLength={8}
+              aria-describedby="birthdate-description"
               placeholder="19900101"
               className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
             />
+            <p id="birthdate-description" className="mt-2 text-sm text-slate-500">
+              생년월일 8자리를 입력해 주세요.
+            </p>
           </div>
 
           <fieldset>
@@ -69,6 +74,7 @@ export function CheckupStart() {
                 id="telecom"
                 name="telecom"
                 defaultValue=""
+                aria-describedby="telecom-description"
                 className="min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
               >
                 <option value="" disabled>
@@ -86,10 +92,15 @@ export function CheckupStart() {
                 name="phoneNo"
                 type="tel"
                 autoComplete="tel"
+                maxLength={11}
+                aria-describedby="telecom-description"
                 placeholder="01012345678"
                 className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
               />
             </div>
+            <p id="telecom-description" className="mt-2 text-sm text-slate-500">
+              알뜰폰은 이용 중인 통신망을 선택하고, 번호는 하이픈 없이 입력해 주세요.
+            </p>
           </fieldset>
 
           <fieldset>
@@ -102,6 +113,7 @@ export function CheckupStart() {
                 id="startDate"
                 name="startDate"
                 defaultValue=""
+                aria-describedby="period-description"
                 className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
               >
                 <option value="" disabled>
@@ -123,6 +135,7 @@ export function CheckupStart() {
                 id="endDate"
                 name="endDate"
                 defaultValue=""
+                aria-describedby="period-description"
                 className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
               >
                 <option value="" disabled>
@@ -135,6 +148,9 @@ export function CheckupStart() {
                 ))}
               </select>
             </div>
+            <p id="period-description" className="mt-2 text-sm text-slate-500">
+              조회 결과는 제공기관이 보유한 건강검진 내역에 따라 달라질 수 있습니다.
+            </p>
           </fieldset>
 
           <button

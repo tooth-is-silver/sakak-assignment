@@ -1,4 +1,7 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { checkupFormSchema, type CheckupFormValues } from '../model/schema';
 
 const EARLIEST_SELECTABLE_YEAR = 2000;
 const currentYear = new Date().getFullYear();
@@ -7,7 +10,22 @@ const selectableYears = Array.from(
   (_, index) => currentYear - index,
 );
 
+function getFieldStateClassName(hasError: boolean) {
+  if (hasError) {
+    return 'border-red-600 focus:border-red-600 focus:ring-red-600/20';
+  }
+
+  return 'border-slate-300 focus:border-teal-700 focus:ring-teal-700/20';
+}
+
 export function CheckupStart() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckupFormValues>({ resolver: zodResolver(checkupFormSchema) });
+  const validateForm = handleSubmit(() => undefined);
+
   return (
     <section
       aria-labelledby="checkup-form-title"
@@ -29,19 +47,26 @@ export function CheckupStart() {
           입력한 정보는 건강검진 결과 조회와 본인인증에만 사용됩니다.
         </p>
 
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={validateForm} noValidate>
           <div>
             <label htmlFor="legalName" className="text-sm font-semibold text-slate-800">
               이름
             </label>
             <input
               id="legalName"
-              name="legalName"
               type="text"
               autoComplete="name"
+              aria-invalid={Boolean(errors.legalName)}
+              aria-describedby={errors.legalName ? 'legalName-error' : ''}
               placeholder="홍길동"
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              {...register('legalName')}
+              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.legalName))}`}
             />
+            {errors.legalName && (
+              <p id="legalName-error" role="alert" className="mt-2 text-sm text-red-700">
+                {errors.legalName.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -50,18 +75,21 @@ export function CheckupStart() {
             </label>
             <input
               id="birthdate"
-              name="birthdate"
               type="text"
               inputMode="numeric"
               autoComplete="bday"
               maxLength={8}
-              aria-describedby="birthdate-description"
+              aria-invalid={Boolean(errors.birthdate)}
+              aria-describedby={errors.birthdate ? 'birthdate-error' : ''}
               placeholder="19900101"
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              {...register('birthdate')}
+              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.birthdate))}`}
             />
-            <p id="birthdate-description" className="mt-2 text-sm text-slate-500">
-              생년월일 8자리를 입력해 주세요.
-            </p>
+            {errors.birthdate && (
+              <p id="birthdate-error" role="alert" className="mt-2 text-sm text-red-700">
+                {errors.birthdate.message}
+              </p>
+            )}
           </div>
 
           <fieldset>
@@ -72,10 +100,11 @@ export function CheckupStart() {
               </label>
               <select
                 id="telecom"
-                name="telecom"
                 defaultValue=""
+                aria-invalid={Boolean(errors.telecom)}
                 aria-describedby="telecom-description"
-                className="min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+                {...register('telecom')}
+                className={`min-h-11 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.telecom))}`}
               >
                 <option value="" disabled>
                   통신사 선택
@@ -89,18 +118,27 @@ export function CheckupStart() {
               </label>
               <input
                 id="phoneNo"
-                name="phoneNo"
                 type="tel"
                 autoComplete="tel"
                 maxLength={11}
+                aria-invalid={Boolean(errors.phoneNo)}
                 aria-describedby="telecom-description"
                 placeholder="01012345678"
-                className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+                {...register('phoneNo')}
+                className={`min-h-11 rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.phoneNo))}`}
               />
             </div>
-            <p id="telecom-description" className="mt-2 text-sm text-slate-500">
-              알뜰폰은 이용 중인 통신망을 선택하고, 번호는 하이픈 없이 입력해 주세요.
-            </p>
+            <div
+              id="telecom-description"
+              role={errors.phoneNo ? 'alert' : ''}
+              className={`mt-2 text-sm ${errors.phoneNo ? 'text-red-700' : 'text-slate-500'}`}
+            >
+              {errors.phoneNo ? (
+                <p>{errors.phoneNo.message}</p>
+              ) : (
+                <p>알뜰폰은 이용 중인 통신망을 선택하고, 번호는 하이픈 없이 입력해 주세요.</p>
+              )}
+            </div>
           </fieldset>
 
           <fieldset>
@@ -111,10 +149,11 @@ export function CheckupStart() {
               </label>
               <select
                 id="startDate"
-                name="startDate"
                 defaultValue=""
+                aria-invalid={Boolean(errors.startDate)}
                 aria-describedby="period-description"
-                className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+                {...register('startDate')}
+                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.startDate))}`}
               >
                 <option value="" disabled>
                   시작 연도
@@ -133,10 +172,11 @@ export function CheckupStart() {
               </label>
               <select
                 id="endDate"
-                name="endDate"
                 defaultValue=""
+                aria-invalid={Boolean(errors.endDate)}
                 aria-describedby="period-description"
-                className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+                {...register('endDate')}
+                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.endDate))}`}
               >
                 <option value="" disabled>
                   종료 연도
@@ -148,13 +188,27 @@ export function CheckupStart() {
                 ))}
               </select>
             </div>
-            <p id="period-description" className="mt-2 text-sm text-slate-500">
-              조회 결과는 제공기관이 보유한 건강검진 내역에 따라 달라질 수 있습니다.
-            </p>
+            <div
+              id="period-description"
+              role={errors.startDate || errors.endDate ? 'alert' : undefined}
+              className={`mt-2 text-sm ${
+                errors.startDate || errors.endDate ? 'text-red-700' : 'text-slate-500'
+              }`}
+            >
+              {errors.startDate || errors.endDate ? (
+                <p>
+                  {errors.startDate?.message}
+                  {errors.startDate && errors.endDate && ' '}
+                  {errors.endDate?.message}
+                </p>
+              ) : (
+                <p>조회 결과는 제공기관이 보유한 건강검진 내역에 따라 달라질 수 있습니다.</p>
+              )}
+            </div>
           </fieldset>
 
           <button
-            type="button"
+            type="submit"
             className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           >
             간편인증 요청

@@ -31,12 +31,24 @@ describe('건강검진 조회 폼 검증', () => {
   });
 
   test('종료 연도가 시작 연도보다 빠르면 거부한다', () => {
-    expect(
-      checkupFormSchema.safeParse({
-        ...validFormValues,
-        startDate: '2026',
-        endDate: '2021',
-      }).success,
-    ).toBe(false);
+    const result = checkupFormSchema.safeParse({
+      ...validFormValues,
+      startDate: '2026',
+      endDate: '2021',
+    });
+
+    expect(result.error?.issues[0]).toMatchObject({
+      message: '종료 연도는 시작 연도와 같거나 이후여야 합니다.',
+      path: ['endDate'],
+    });
+  });
+
+  test('존재하지 않는 생년월일에 사용자용 오류를 제공한다', () => {
+    const result = checkupFormSchema.safeParse({ ...validFormValues, birthdate: '19900230' });
+
+    expect(result.error?.issues[0]).toMatchObject({
+      message: '올바른 생년월일을 입력해 주세요.',
+      path: ['birthdate'],
+    });
   });
 });

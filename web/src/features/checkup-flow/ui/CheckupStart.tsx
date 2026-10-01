@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ChangeEvent, InputEvent } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useBeforeUnload, useBlocker } from 'react-router-dom';
 import { checkupFormSchema, type CheckupFormValues } from '../model/schema';
 
 const EARLIEST_SELECTABLE_YEAR = 2000;
@@ -31,9 +32,43 @@ export function CheckupStart() {
     getValues,
     setValue,
     formState: { errors },
-  } = useForm<CheckupFormValues>({ resolver: zodResolver(checkupFormSchema) });
-  const startDate = useWatch({ control, name: 'startDate' });
+  } = useForm<CheckupFormValues>({
+    resolver: zodResolver(checkupFormSchema),
+    defaultValues: {
+      legalName: '',
+      birthdate: '',
+      phoneNo: '',
+      telecom: undefined,
+      startDate: '',
+      endDate: '',
+    },
+  });
+  const formValues = useWatch({ control });
+  const startDate = formValues.startDate;
+  const shouldWarnBeforeLeave = Object.values(formValues).some(Boolean);
+  const blocker = useBlocker(shouldWarnBeforeLeave);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
   const validateForm = handleSubmit(() => undefined);
+  const handleBeforeUnload = useCallback(
+    (event: BeforeUnloadEvent) => {
+      if (shouldWarnBeforeLeave) {
+        event.preventDefault();
+      }
+    },
+    [shouldWarnBeforeLeave],
+  );
+
+  useBeforeUnload(handleBeforeUnload);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      if (!dialogRef.current?.open) {
+        dialogRef.current?.showModal();
+      }
+      continueButtonRef.current?.focus();
+    }
+  }, [blocker.state]);
 
   function handleStartDateChange(event: ChangeEvent<HTMLSelectElement>) {
     const endDate = getValues('endDate');
@@ -168,7 +203,6 @@ export function CheckupStart() {
               </label>
               <select
                 id="startDate"
-                defaultValue=""
                 aria-invalid={Boolean(errors.startDate)}
                 aria-describedby="period-description"
                 {...register('startDate', { onChange: handleStartDateChange })}
@@ -191,7 +225,6 @@ export function CheckupStart() {
               </label>
               <select
                 id="endDate"
-                defaultValue=""
                 disabled={!startDate}
                 aria-invalid={Boolean(errors.endDate)}
                 aria-describedby="period-description"
@@ -239,6 +272,44 @@ export function CheckupStart() {
           </button>
         </form>
       </div>
+
+      {blocker.state === 'blocked' && (
+        <dialog
+          ref={dialogRef}
+          role="alertdialog"
+          aria-labelledby="leave-confirmation-title"
+          aria-describedby="leave-confirmation-description"
+          onCancel={(event) => {
+            event.preventDefault();
+            blocker.reset();
+          }}
+          className="m-auto w-[calc(100%_-_3rem)] max-w-sm rounded-2xl bg-white p-6 shadow-xl backdrop:bg-slate-950/50"
+        >
+          <h2 id="leave-confirmation-title" className="text-xl font-bold text-slate-950">
+            입력을 중단할까요?
+          </h2>
+          <p id="leave-confirmation-description" className="mt-3 text-sm leading-6 text-slate-600">
+            이 화면을 나가면 입력한 정보가 모두 사라집니다.
+          </p>
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              ref={continueButtonRef}
+              type="button"
+              onClick={() => blocker.reset()}
+              className="min-h-11 rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              계속 작성
+            </button>
+            <button
+              type="button"
+              onClick={() => blocker.proceed()}
+              className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+            >
+              나가기
+            </button>
+          </div>
+        </dialog>
+      )}
     </section>
   );
 }

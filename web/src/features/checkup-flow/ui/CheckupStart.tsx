@@ -3,14 +3,11 @@ import type { ChangeEvent, InputEvent } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link, useBeforeUnload, useBlocker } from 'react-router-dom';
-import { checkupFormSchema, type CheckupFormValues } from '../model/schema';
-
-const EARLIEST_SELECTABLE_YEAR = 2000;
-const currentYear = new Date().getFullYear();
-const selectableYears = Array.from(
-  { length: currentYear - EARLIEST_SELECTABLE_YEAR + 1 },
-  (_, index) => currentYear - index,
-);
+import {
+  SELECTABLE_CHECKUP_YEARS,
+  checkupFormSchema,
+  type CheckupFormValues,
+} from '../model/schema';
 
 function getFieldStateClassName(hasError: boolean) {
   if (hasError) {
@@ -211,7 +208,7 @@ export function CheckupStart() {
                 <option value="" disabled>
                   시작 연도
                 </option>
-                {selectableYears.map((year) => (
+                {SELECTABLE_CHECKUP_YEARS.map((year) => (
                   <option key={year} value={year}>
                     {year}년
                   </option>
@@ -234,7 +231,7 @@ export function CheckupStart() {
                 <option value="" disabled>
                   종료 연도
                 </option>
-                {selectableYears.map((year) => {
+                {SELECTABLE_CHECKUP_YEARS.map((year) => {
                   const isBeforeStartDate = Boolean(startDate && year < Number(startDate));
 
                   return (
@@ -259,7 +256,7 @@ export function CheckupStart() {
                   {errors.endDate?.message}
                 </p>
               ) : (
-                <p>조회 결과는 제공기관이 보유한 건강검진 내역에 따라 달라질 수 있습니다.</p>
+                <p>최근 5년 이내의 건강검진 내역만 조회할 수 있습니다.</p>
               )}
             </div>
           </fieldset>

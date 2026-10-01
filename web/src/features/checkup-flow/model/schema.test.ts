@@ -1,12 +1,16 @@
-import { checkupFormSchema } from './schema';
+import {
+  CURRENT_CHECKUP_YEAR,
+  EARLIEST_CHECKUP_YEAR,
+  checkupFormSchema,
+} from './schema';
 
 const validFormValues = {
   legalName: '홍길동',
   birthdate: '19900201',
   phoneNo: '01012345678',
   telecom: '0',
-  startDate: '2021',
-  endDate: '2026',
+  startDate: String(EARLIEST_CHECKUP_YEAR),
+  endDate: String(CURRENT_CHECKUP_YEAR),
 };
 
 describe('건강검진 조회 폼 검증', () => {
@@ -33,13 +37,25 @@ describe('건강검진 조회 폼 검증', () => {
   test('종료 연도가 시작 연도보다 빠르면 거부한다', () => {
     const result = checkupFormSchema.safeParse({
       ...validFormValues,
-      startDate: '2026',
-      endDate: '2021',
+      startDate: String(CURRENT_CHECKUP_YEAR),
+      endDate: String(EARLIEST_CHECKUP_YEAR),
     });
 
     expect(result.error?.issues[0]).toMatchObject({
       message: '종료 연도는 시작 연도와 같거나 이후여야 합니다.',
       path: ['endDate'],
+    });
+  });
+
+  test.each([
+    ['최근 5년보다 이전인 연도', String(EARLIEST_CHECKUP_YEAR - 1)],
+    ['현재보다 이후인 연도', String(CURRENT_CHECKUP_YEAR + 1)],
+  ])('%s를 거부한다', (_case, startDate) => {
+    const result = checkupFormSchema.safeParse({ ...validFormValues, startDate });
+
+    expect(result.error?.issues[0]).toMatchObject({
+      message: '최근 5년 이내의 연도를 선택해 주세요.',
+      path: ['startDate'],
     });
   });
 

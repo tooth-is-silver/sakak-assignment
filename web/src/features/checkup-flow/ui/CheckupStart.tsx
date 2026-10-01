@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import type { ChangeEvent, InputEvent } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { checkupFormSchema, type CheckupFormValues } from '../model/schema';
 
@@ -18,13 +19,29 @@ function getFieldStateClassName(hasError: boolean) {
   return 'border-slate-300 focus:border-teal-700 focus:ring-teal-700/20';
 }
 
+function handleNumericInput(event: InputEvent<HTMLInputElement>) {
+  event.currentTarget.value = event.currentTarget.value.replace(/\D/g, '');
+}
+
 export function CheckupStart() {
   const {
     register,
     handleSubmit,
+    control,
+    getValues,
+    setValue,
     formState: { errors },
   } = useForm<CheckupFormValues>({ resolver: zodResolver(checkupFormSchema) });
+  const startDate = useWatch({ control, name: 'startDate' });
   const validateForm = handleSubmit(() => undefined);
+
+  function handleStartDateChange(event: ChangeEvent<HTMLSelectElement>) {
+    const endDate = getValues('endDate');
+
+    if (endDate && endDate < event.target.value) {
+      setValue('endDate', '', { shouldDirty: true, shouldValidate: true });
+    }
+  }
 
   return (
     <section
@@ -79,6 +96,7 @@ export function CheckupStart() {
               inputMode="numeric"
               autoComplete="bday"
               maxLength={8}
+              onInput={handleNumericInput}
               aria-invalid={Boolean(errors.birthdate)}
               aria-describedby={errors.birthdate ? 'birthdate-error' : ''}
               placeholder="19900101"
@@ -121,6 +139,7 @@ export function CheckupStart() {
                 type="tel"
                 autoComplete="tel"
                 maxLength={11}
+                onInput={handleNumericInput}
                 aria-invalid={Boolean(errors.phoneNo)}
                 aria-describedby="telecom-description"
                 placeholder="01012345678"
@@ -152,7 +171,7 @@ export function CheckupStart() {
                 defaultValue=""
                 aria-invalid={Boolean(errors.startDate)}
                 aria-describedby="period-description"
-                {...register('startDate')}
+                {...register('startDate', { onChange: handleStartDateChange })}
                 className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.startDate))}`}
               >
                 <option value="" disabled>
@@ -173,19 +192,24 @@ export function CheckupStart() {
               <select
                 id="endDate"
                 defaultValue=""
+                disabled={!startDate}
                 aria-invalid={Boolean(errors.endDate)}
                 aria-describedby="period-description"
                 {...register('endDate')}
-                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.endDate))}`}
+                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${getFieldStateClassName(Boolean(errors.endDate))}`}
               >
                 <option value="" disabled>
                   종료 연도
                 </option>
-                {selectableYears.map((year) => (
-                  <option key={year} value={year}>
-                    {year}년
-                  </option>
-                ))}
+                {selectableYears.map((year) => {
+                  const isBeforeStartDate = Boolean(startDate && year < Number(startDate));
+
+                  return (
+                    <option key={year} value={year} disabled={isBeforeStartDate}>
+                      {year}년
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div

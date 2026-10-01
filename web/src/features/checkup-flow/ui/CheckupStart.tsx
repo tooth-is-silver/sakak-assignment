@@ -4,10 +4,20 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link, useBeforeUnload, useBlocker } from 'react-router-dom';
 import {
+  useAuthenticationMutation,
+  type FirstRequest,
+  type MultiFactorInfo,
+} from '@/entities/checkup';
+import { createAuthenticationRequest } from '../model/request';
+import {
   SELECTABLE_CHECKUP_YEARS,
   checkupFormSchema,
   type CheckupFormValues,
 } from '../model/schema';
+
+interface Props {
+  onAuthenticationRequested: (request: FirstRequest, multiFactorInfo: MultiFactorInfo) => void;
+}
 
 function getFieldStateClassName(hasError: boolean) {
   if (hasError) {
@@ -21,7 +31,7 @@ function handleNumericInput(event: InputEvent<HTMLInputElement>) {
   event.currentTarget.value = event.currentTarget.value.replace(/\D/g, '');
 }
 
-export function CheckupStart() {
+export function CheckupStart({ onAuthenticationRequested }: Props) {
   const {
     register,
     handleSubmit,
@@ -44,9 +54,16 @@ export function CheckupStart() {
   const startDate = formValues.startDate;
   const shouldWarnBeforeLeave = Object.values(formValues).some(Boolean);
   const blocker = useBlocker(shouldWarnBeforeLeave);
+  const authenticationMutation = useAuthenticationMutation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
-  const validateForm = handleSubmit(() => undefined);
+  const validateForm = handleSubmit((values) => {
+    const request = createAuthenticationRequest(values, `id-${crypto.randomUUID()}`);
+
+    authenticationMutation.mutate(request, {
+      onSuccess: (multiFactorInfo) => onAuthenticationRequested(request, multiFactorInfo),
+    });
+  });
   const handleBeforeUnload = useCallback(
     (event: BeforeUnloadEvent) => {
       if (shouldWarnBeforeLeave) {
@@ -263,10 +280,16 @@ export function CheckupStart() {
 
           <button
             type="submit"
-            className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            disabled={authenticationMutation.isPending}
+            className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            간편인증 요청
+            {authenticationMutation.isPending ? '인증 요청 중…' : '간편인증 요청'}
           </button>
+          {authenticationMutation.isError && (
+            <p role="alert" className="text-sm text-red-700">
+              {authenticationMutation.error.message}
+            </p>
+          )}
         </form>
       </div>
 

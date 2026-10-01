@@ -1,5 +1,12 @@
 import { Link } from 'react-router-dom';
 
+const EARLIEST_SELECTABLE_YEAR = 2000;
+const currentYear = new Date().getFullYear();
+const selectableYears = Array.from(
+  { length: currentYear - EARLIEST_SELECTABLE_YEAR + 1 },
+  (_, index) => currentYear - index,
+);
+
 export function CheckupStart() {
   return (
     <section
@@ -84,6 +91,58 @@ export function CheckupStart() {
               />
             </div>
           </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold text-slate-800">조회 기간</legend>
+            <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <label className="sr-only" htmlFor="startDate">
+                조회 시작 연도
+              </label>
+              <select
+                id="startDate"
+                name="startDate"
+                defaultValue=""
+                className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              >
+                <option value="" disabled>
+                  시작 연도
+                </option>
+                {selectableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}년
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true" className="text-slate-400">
+                –
+              </span>
+              <label className="sr-only" htmlFor="endDate">
+                조회 종료 연도
+              </label>
+              <select
+                id="endDate"
+                name="endDate"
+                defaultValue=""
+                className="min-h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              >
+                <option value="" disabled>
+                  종료 연도
+                </option>
+                {selectableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}년
+                  </option>
+                ))}
+              </select>
+            </div>
+          </fieldset>
+
+          <button
+            type="button"
+            className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          >
+            간편인증 요청
+          </button>
         </form>
       </div>
     </section>

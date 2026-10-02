@@ -1,0 +1,10 @@
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "sakak",
+      "name": "SAKAK"
+    },
+    "sessionToken": "sakak-mock-session"
+  }
+}

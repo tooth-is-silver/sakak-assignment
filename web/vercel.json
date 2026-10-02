@@ -3,6 +3,10 @@
     {
       "source": "/checkup",
       "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/index.html"
     }
   ],
   "functions": {

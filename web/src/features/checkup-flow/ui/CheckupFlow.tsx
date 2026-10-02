@@ -16,6 +16,10 @@ export function CheckupFlow() {
     setFlowState({ step: 'result', data });
   }
 
+  function handleRestart() {
+    setFlowState(INITIAL_CHECKUP_FLOW_STATE);
+  }
+
   if (flowState.step === 'waitingForAuthentication') {
     return (
       <AuthenticationWaiting
@@ -27,7 +31,7 @@ export function CheckupFlow() {
   }
 
   if (flowState.step === 'result') {
-    return <CheckupResults data={flowState.data} />;
+    return <CheckupResults data={flowState.data} onRestart={handleRestart} />;
   }
 
   return <CheckupStart onAuthenticationRequested={handleAuthenticationRequested} />;

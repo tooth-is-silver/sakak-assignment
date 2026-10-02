@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/checkup",
+      "destination": "/index.html"
+    }
+  ],
   "functions": {
     "api/checkup.ts": {
       "maxDuration": 60

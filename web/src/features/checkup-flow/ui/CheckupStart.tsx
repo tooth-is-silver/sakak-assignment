@@ -282,7 +282,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
                   {errors.endDate?.message}
                 </p>
               ) : (
-                <p>최근 5년 이내의 건강검진 내역만 조회할 수 있습니다.</p>
+                <p>최근 10년 이내의 건강검진 내역을 조회할 수 있습니다.</p>
               )}
             </div>
           </fieldset>

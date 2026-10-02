@@ -1,8 +1,4 @@
-import {
-  CURRENT_CHECKUP_YEAR,
-  EARLIEST_CHECKUP_YEAR,
-  checkupFormSchema,
-} from './schema';
+import { CURRENT_CHECKUP_YEAR, EARLIEST_CHECKUP_YEAR, checkupFormSchema } from './schema';
 
 const validFormValues = {
   legalName: '홍길동',
@@ -19,9 +15,9 @@ describe('건강검진 조회 폼 검증', () => {
   });
 
   test('윤년의 2월 29일을 허용한다', () => {
-    expect(
-      checkupFormSchema.safeParse({ ...validFormValues, birthdate: '20000229' }).success,
-    ).toBe(true);
+    expect(checkupFormSchema.safeParse({ ...validFormValues, birthdate: '20000229' }).success).toBe(
+      true,
+    );
   });
 
   test.each([
@@ -31,7 +27,9 @@ describe('건강검진 조회 폼 검증', () => {
     ['지원하지 않는 통신사', { telecom: '3' }],
     ['한 글자인 이름', { legalName: '김' }],
   ])('%s을 거부한다', (_case, invalidValues) => {
-    expect(checkupFormSchema.safeParse({ ...validFormValues, ...invalidValues }).success).toBe(false);
+    expect(checkupFormSchema.safeParse({ ...validFormValues, ...invalidValues }).success).toBe(
+      false,
+    );
   });
 
   test('종료 연도가 시작 연도보다 빠르면 거부한다', () => {
@@ -48,13 +46,13 @@ describe('건강검진 조회 폼 검증', () => {
   });
 
   test.each([
-    ['최근 5년보다 이전인 연도', String(EARLIEST_CHECKUP_YEAR - 1)],
+    ['최근 10년보다 이전인 연도', String(EARLIEST_CHECKUP_YEAR - 1)],
     ['현재보다 이후인 연도', String(CURRENT_CHECKUP_YEAR + 1)],
   ])('%s를 거부한다', (_case, startDate) => {
     const result = checkupFormSchema.safeParse({ ...validFormValues, startDate });
 
     expect(result.error?.issues[0]).toMatchObject({
-      message: '최근 5년 이내의 연도를 선택해 주세요.',
+      message: '최근 10년 이내의 연도를 선택해 주세요.',
       path: ['startDate'],
     });
   });

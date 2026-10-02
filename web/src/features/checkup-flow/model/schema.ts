@@ -9,7 +9,7 @@ const MAXIMUM_NAME_LENGTH = 20;
 const BIRTHDATE_PATTERN = /^\d{8}$/;
 const YEAR_PATTERN = /^\d{4}$/;
 
-export const CHECKUP_HISTORY_YEAR_COUNT = 5;
+export const CHECKUP_HISTORY_YEAR_COUNT = 10;
 export const CURRENT_CHECKUP_YEAR = new Date().getFullYear();
 export const EARLIEST_CHECKUP_YEAR = CURRENT_CHECKUP_YEAR - CHECKUP_HISTORY_YEAR_COUNT + 1;
 export const SELECTABLE_CHECKUP_YEARS = Array.from(
@@ -42,7 +42,7 @@ function createCheckupYearSchema(requiredMessage: string) {
     .regex(YEAR_PATTERN, requiredMessage)
     .refine(
       (value) => !YEAR_PATTERN.test(value) || isSelectableCheckupYear(value),
-      '최근 5년 이내의 연도를 선택해 주세요.',
+      '최근 10년 이내의 연도를 선택해 주세요.',
     );
 }
 
@@ -59,9 +59,7 @@ export const checkupFormSchema = z
         (value) => !BIRTHDATE_PATTERN.test(value) || isValidBirthdate(value),
         '올바른 생년월일을 입력해 주세요.',
       ),
-    phoneNo: z
-      .string()
-      .regex(/^01[016789]\d{7,8}$/, '올바른 휴대전화 번호를 입력해 주세요.'),
+    phoneNo: z.string().regex(/^01[016789]\d{7,8}$/, '올바른 휴대전화 번호를 입력해 주세요.'),
     telecom: z.enum(['0', '1', '2'], { error: '통신사를 선택해 주세요.' }),
     startDate: createCheckupYearSchema('시작 연도를 선택해 주세요.'),
     endDate: createCheckupYearSchema('종료 연도를 선택해 주세요.'),

@@ -15,6 +15,7 @@ export {
   type CheckupData,
   type CheckupOverview,
   type CheckupReference,
+  type CheckupResult,
 } from './api/schema';
 export { parseNumericReference, type ReferenceRange } from './model/reference';
 export { determineCheckupStatus, type CheckupStatus, type MeasurementField } from './model/status';

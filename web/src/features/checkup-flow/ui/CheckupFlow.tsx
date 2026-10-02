@@ -3,7 +3,7 @@ import type { CheckupData, FirstRequest, MultiFactorInfo } from '@/entities/chec
 import { INITIAL_CHECKUP_FLOW_STATE } from '../model/state';
 import { AuthenticationWaiting } from './AuthenticationWaiting';
 import { CheckupStart } from './CheckupStart';
-import { RecentCheckupDashboard } from './RecentCheckupDashboard';
+import { CheckupResults } from './CheckupResults';
 
 export function CheckupFlow() {
   const [flowState, setFlowState] = useState(INITIAL_CHECKUP_FLOW_STATE);
@@ -27,7 +27,7 @@ export function CheckupFlow() {
   }
 
   if (flowState.step === 'result') {
-    return <RecentCheckupDashboard data={flowState.data} />;
+    return <CheckupResults data={flowState.data} />;
   }
 
   return <CheckupStart onAuthenticationRequested={handleAuthenticationRequested} />;

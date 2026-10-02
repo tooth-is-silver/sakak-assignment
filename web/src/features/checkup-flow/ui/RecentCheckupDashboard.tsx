@@ -2,10 +2,10 @@ import type { CheckupData, CheckupStatus } from '@/entities/checkup';
 import { createRecentCheckupDashboard } from '../model/dashboard';
 
 const STATUS_CONTENT: Record<CheckupStatus, { label: string; className: string }> = {
-  normal: { label: '정상', className: 'border-emerald-300 bg-emerald-50 text-emerald-800' },
-  caution: { label: '주의', className: 'border-amber-300 bg-amber-50 text-amber-900' },
-  risk: { label: '위험', className: 'border-red-300 bg-red-50 text-red-800' },
-  unknown: { label: '판정 불가', className: 'border-slate-300 bg-slate-100 text-slate-700' },
+  normal: { label: '정상', className: 'border-emerald-600 bg-emerald-600 text-white' },
+  caution: { label: '주의', className: 'border-amber-600 bg-amber-600 text-white' },
+  risk: { label: '위험', className: 'border-red-600 bg-red-600 text-white' },
+  unknown: { label: '판정 불가', className: 'border-slate-600 bg-slate-600 text-white' },
 };
 
 interface Props {
@@ -19,7 +19,7 @@ export function RecentCheckupDashboard({ data }: Props) {
     return (
       <section
         aria-labelledby="empty-checkup-title"
-        className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-6 py-10 sm:py-16"
+        className="flex min-h-[32rem] w-full items-center"
       >
         <div className="w-full rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <h1 id="empty-checkup-title" className="text-2xl font-bold text-slate-950">
@@ -34,10 +34,7 @@ export function RecentCheckupDashboard({ data }: Props) {
   }
 
   return (
-    <section
-      aria-labelledby="recent-checkup-title"
-      className="mx-auto min-h-screen w-full max-w-5xl px-6 py-10 sm:py-16"
-    >
+    <section aria-labelledby="recent-checkup-title" className="py-8">
       <p className="text-sm font-semibold text-teal-700">최근 건강검진 결과</p>
       <h1 id="recent-checkup-title" className="mt-2 text-3xl font-bold text-slate-950">
         {data.patientName}님의 건강 상태

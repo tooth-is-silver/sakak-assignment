@@ -1,4 +1,5 @@
 import {
+  getCheckupErrorMessage,
   useCheckupResultMutation,
   type CheckupData,
   type FirstRequest,
@@ -9,16 +10,31 @@ interface Props {
   request: FirstRequest;
   multiFactorInfo: MultiFactorInfo;
   onResultReceived: (data: CheckupData) => void;
+  onRestart: () => void;
 }
 
-export function AuthenticationWaiting({ request, multiFactorInfo, onResultReceived }: Props) {
+export function AuthenticationWaiting({
+  request,
+  multiFactorInfo,
+  onResultReceived,
+  onRestart,
+}: Props) {
   const checkupResultMutation = useCheckupResultMutation();
+  let actionLabel = '인증 완료';
+
+  if (checkupResultMutation.isPending) {
+    actionLabel = '결과 조회 중…';
+  } else if (checkupResultMutation.isError) {
+    actionLabel = '처음부터 다시';
+  }
 
   function handleAuthenticationCompleted() {
-    checkupResultMutation.mutate(
-      { request, multiFactorInfo },
-      { onSuccess: onResultReceived },
-    );
+    if (checkupResultMutation.isError) {
+      onRestart();
+      return;
+    }
+
+    checkupResultMutation.mutate({ request, multiFactorInfo }, { onSuccess: onResultReceived });
   }
 
   return (
@@ -34,7 +50,7 @@ export function AuthenticationWaiting({ request, multiFactorInfo, onResultReceiv
         <div aria-live="polite" className="mt-3 text-sm leading-6">
           {checkupResultMutation.isError ? (
             <p role="alert" className="text-red-700">
-              {checkupResultMutation.error.message}
+              {getCheckupErrorMessage(checkupResultMutation.error)}
             </p>
           ) : (
             <p className="text-slate-600">
@@ -48,7 +64,7 @@ export function AuthenticationWaiting({ request, multiFactorInfo, onResultReceiv
           onClick={handleAuthenticationCompleted}
           className="mt-8 min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          {checkupResultMutation.isPending ? '결과 조회 중…' : '인증 완료'}
+          {actionLabel}
         </button>
       </div>
     </section>

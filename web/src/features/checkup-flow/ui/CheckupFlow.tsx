@@ -26,6 +26,7 @@ export function CheckupFlow() {
         request={flowState.request}
         multiFactorInfo={flowState.multiFactorInfo}
         onResultReceived={handleResultReceived}
+        onRestart={handleRestart}
       />
     );
   }

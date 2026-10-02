@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link, useBeforeUnload, useBlocker } from 'react-router-dom';
 import {
+  getCheckupErrorMessage,
   useAuthenticationMutation,
   type FirstRequest,
   type MultiFactorInfo,
@@ -295,7 +296,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
           </button>
           {authenticationMutation.isError && (
             <p role="alert" className="text-sm text-red-700">
-              {authenticationMutation.error.message}
+              {getCheckupErrorMessage(authenticationMutation.error)}
             </p>
           )}
         </form>

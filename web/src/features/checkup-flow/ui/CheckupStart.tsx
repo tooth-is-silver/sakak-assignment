@@ -55,6 +55,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
   const shouldWarnBeforeLeave = Object.values(formValues).some(Boolean);
   const blocker = useBlocker(shouldWarnBeforeLeave);
   const authenticationMutation = useAuthenticationMutation();
+  const isAuthenticationPending = authenticationMutation.isPending;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
   const validateForm = handleSubmit((values) => {
@@ -113,7 +114,12 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
           입력한 정보는 건강검진 결과 조회와 본인인증에만 사용됩니다.
         </p>
 
-        <form className="mt-8 space-y-6" onSubmit={validateForm} noValidate>
+        <form
+          className="mt-8 space-y-6"
+          aria-busy={isAuthenticationPending}
+          onSubmit={validateForm}
+          noValidate
+        >
           <div>
             <label htmlFor="legalName" className="text-sm font-semibold text-slate-800">
               이름
@@ -124,9 +130,10 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
               autoComplete="name"
               aria-invalid={Boolean(errors.legalName)}
               aria-describedby={errors.legalName ? 'legalName-error' : ''}
+              disabled={isAuthenticationPending}
               placeholder="홍길동"
               {...register('legalName')}
-              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.legalName))}`}
+              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${getFieldStateClassName(Boolean(errors.legalName))}`}
             />
             {errors.legalName && (
               <p id="legalName-error" role="alert" className="mt-2 text-sm text-red-700">
@@ -148,9 +155,10 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
               onInput={handleNumericInput}
               aria-invalid={Boolean(errors.birthdate)}
               aria-describedby={errors.birthdate ? 'birthdate-error' : ''}
+              disabled={isAuthenticationPending}
               placeholder="19900101"
               {...register('birthdate')}
-              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.birthdate))}`}
+              className={`mt-2 min-h-11 w-full rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${getFieldStateClassName(Boolean(errors.birthdate))}`}
             />
             {errors.birthdate && (
               <p id="birthdate-error" role="alert" className="mt-2 text-sm text-red-700">
@@ -159,7 +167,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
             )}
           </div>
 
-          <fieldset>
+          <fieldset disabled={isAuthenticationPending}>
             <legend className="text-sm font-semibold text-slate-800">휴대전화</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-[10rem_1fr]">
               <label className="sr-only" htmlFor="telecom">
@@ -171,7 +179,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
                 aria-invalid={Boolean(errors.telecom)}
                 aria-describedby="telecom-description"
                 {...register('telecom')}
-                className={`min-h-11 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.telecom))}`}
+                className={`min-h-11 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${getFieldStateClassName(Boolean(errors.telecom))}`}
               >
                 <option value="" disabled>
                   통신사 선택
@@ -193,7 +201,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
                 aria-describedby="telecom-description"
                 placeholder="01012345678"
                 {...register('phoneNo')}
-                className={`min-h-11 rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.phoneNo))}`}
+                className={`min-h-11 rounded-xl border px-4 py-3 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${getFieldStateClassName(Boolean(errors.phoneNo))}`}
               />
             </div>
             <div
@@ -209,7 +217,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
             </div>
           </fieldset>
 
-          <fieldset>
+          <fieldset disabled={isAuthenticationPending}>
             <legend className="text-sm font-semibold text-slate-800">조회 기간</legend>
             <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
               <label className="sr-only" htmlFor="startDate">
@@ -220,7 +228,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
                 aria-invalid={Boolean(errors.startDate)}
                 aria-describedby="period-description"
                 {...register('startDate', { onChange: handleStartDateChange })}
-                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 ${getFieldStateClassName(Boolean(errors.startDate))}`}
+                className={`min-h-11 min-w-0 rounded-xl border bg-white px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 ${getFieldStateClassName(Boolean(errors.startDate))}`}
               >
                 <option value="" disabled>
                   시작 연도
@@ -239,7 +247,7 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
               </label>
               <select
                 id="endDate"
-                disabled={!startDate}
+                disabled={!startDate || isAuthenticationPending}
                 aria-invalid={Boolean(errors.endDate)}
                 aria-describedby="period-description"
                 {...register('endDate')}
@@ -280,10 +288,10 @@ export function CheckupStart({ onAuthenticationRequested }: Props) {
 
           <button
             type="submit"
-            disabled={authenticationMutation.isPending}
+            disabled={isAuthenticationPending}
             className="min-h-11 w-full rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {authenticationMutation.isPending ? '인증 요청 중…' : '간편인증 요청'}
+            {isAuthenticationPending ? '인증 요청 중…' : '간편인증 요청'}
           </button>
           {authenticationMutation.isError && (
             <p role="alert" className="text-sm text-red-700">

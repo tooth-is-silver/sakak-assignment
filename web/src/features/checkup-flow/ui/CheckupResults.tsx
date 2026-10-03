@@ -9,6 +9,8 @@ interface Props {
 }
 
 export function CheckupResults({ data, onRestart }: Props) {
+  const hasNoCheckupResults = data.overviewList.length === 0 && data.resultList.length === 0;
+
   return (
     <div className="mx-auto min-h-screen w-full max-w-5xl px-6 py-10 sm:py-16">
       <nav aria-label="건강검진 결과 메뉴" className="mb-8 flex flex-wrap gap-3">
@@ -26,9 +28,22 @@ export function CheckupResults({ data, onRestart }: Props) {
           다른 정보로 조회
         </button>
       </nav>
-      <RecentCheckupDashboard data={data} />
-      <hr className="mt-12 border-slate-200" />
-      <CheckupHistory data={data} />
+      {hasNoCheckupResults ? (
+        <section aria-labelledby="empty-results-title" className="py-16 text-center">
+          <h1 id="empty-results-title" className="text-2xl font-bold text-slate-950">
+            최근 진행하신 건강검진 결과가 없습니다.
+          </h1>
+          <p className="mt-3 text-sm text-slate-600">
+            선택한 기간에 제공기관이 보유한 검진 내역이 없습니다.
+          </p>
+        </section>
+      ) : (
+        <>
+          <RecentCheckupDashboard data={data} />
+          <hr className="mt-12 border-slate-200" />
+          <CheckupHistory data={data} />
+        </>
+      )}
     </div>
   );
 }

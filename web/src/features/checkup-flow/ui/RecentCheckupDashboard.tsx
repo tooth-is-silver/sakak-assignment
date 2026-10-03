@@ -1,11 +1,11 @@
-import type { CheckupData, CheckupStatus } from '@/entities/checkup';
+import { getCheckupStatusBadge, type CheckupData, type CheckupStatus } from '@/entities/checkup';
 import { createRecentCheckupDashboard } from '../model/dashboard';
 
-const STATUS_CONTENT: Record<CheckupStatus, { label: string; className: string }> = {
-  normal: { label: '정상', className: 'border-emerald-600 bg-emerald-600 text-white' },
-  caution: { label: '주의', className: 'border-amber-600 bg-amber-600 text-white' },
-  risk: { label: '위험', className: 'border-red-600 bg-red-600 text-white' },
-  unknown: { label: '판정 불가', className: 'border-slate-600 bg-slate-600 text-white' },
+const STATUS_CLASS_NAME: Record<CheckupStatus, string> = {
+  normal: 'border-emerald-600 bg-emerald-600 text-white',
+  caution: 'border-amber-600 bg-amber-600 text-white',
+  risk: 'border-red-600 bg-red-600 text-white',
+  unknown: 'border-slate-300 bg-slate-100 text-slate-950',
 };
 
 interface Props {
@@ -43,7 +43,7 @@ export function RecentCheckupDashboard({ data }: Props) {
 
       <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {dashboard.items.map((item) => {
-          const statusContent = STATUS_CONTENT[item.status];
+          const statusBadge = getCheckupStatusBadge(item.value, item.field, data.referenceList);
 
           return (
             <li
@@ -53,9 +53,9 @@ export function RecentCheckupDashboard({ data }: Props) {
               <div className="flex items-start justify-between gap-3">
                 <h2 className="font-semibold text-slate-700">{item.label}</h2>
                 <span
-                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${statusContent.className}`}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${STATUS_CLASS_NAME[statusBadge.status]}`}
                 >
-                  {statusContent.label}
+                  {statusBadge.label}
                 </span>
               </div>
               <p className="mt-5 text-2xl font-bold text-slate-950">

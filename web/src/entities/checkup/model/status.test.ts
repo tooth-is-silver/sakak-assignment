@@ -1,5 +1,10 @@
 import type { CheckupReference } from '../api/schema';
-import { determineCheckupStatus } from './status';
+import {
+  determineCheckupStatus,
+  getCheckupStatusBadge,
+  type CheckupStatus,
+  type MeasurementField,
+} from './status';
 
 function createReference(refType: string, BMI: string): CheckupReference {
   return {
@@ -50,6 +55,66 @@ const CHEST_XRAY_REFERENCES = [
   { ...createReference('정상(A)', ''), chestXrayResult: '정상, 비활동성' },
   { ...createReference('정상(B)', ''), chestXrayResult: '' },
   { ...createReference('질환의심', ''), chestXrayResult: '정상 및 비활동성이외의자' },
+];
+
+interface TextBadgeCase {
+  caseName: string;
+  measurement: string;
+  field: MeasurementField;
+  references: CheckupReference[];
+  expectedStatus: CheckupStatus;
+  expectedLabel: string;
+}
+
+const TEXT_BADGE_CASES: TextBadgeCase[] = [
+  {
+    caseName: '요단백 정상 문구',
+    measurement: '음성',
+    field: 'proteinuria',
+    references: PROTEINURIA_REFERENCES,
+    expectedStatus: 'normal',
+    expectedLabel: '음성',
+  },
+  {
+    caseName: '흉부 X선 정상 문구',
+    measurement: '정상',
+    field: 'chestXrayResult',
+    references: CHEST_XRAY_REFERENCES,
+    expectedStatus: 'normal',
+    expectedLabel: '정상',
+  },
+  {
+    caseName: '흉부 X선 비활동성 문구',
+    measurement: '비활동성',
+    field: 'chestXrayResult',
+    references: CHEST_XRAY_REFERENCES,
+    expectedStatus: 'normal',
+    expectedLabel: '비활동성',
+  },
+  {
+    caseName: '요단백 약양성 문구',
+    measurement: '약양성±',
+    field: 'proteinuria',
+    references: PROTEINURIA_REFERENCES,
+    expectedStatus: 'unknown',
+    expectedLabel: '약양성±',
+  },
+  {
+    caseName: '요단백 양성 문구',
+    measurement: '양성(+1)',
+    field: 'proteinuria',
+    references: PROTEINURIA_REFERENCES,
+    expectedStatus: 'unknown',
+    expectedLabel: '양성(+1)',
+  },
+  {
+    caseName: '확인하지 않은 흉부 X선 문구',
+    measurement: '폐결핵 의심',
+    field: 'chestXrayResult',
+    references: CHEST_XRAY_REFERENCES,
+    expectedStatus: 'unknown',
+    expectedLabel: '폐결핵 의심',
+  },
 ];
 
 describe('검진 수치 상태 판정', () => {
@@ -134,57 +199,21 @@ describe('혈압 상태 판정 회귀', () => {
   });
 });
 
-describe('요단백 상태 판정 회귀', () => {
-  test.each([
-    ['음성', 'normal'],
-    ['약양성±', 'caution'],
-    ['양성(+1)', 'risk'],
-    ['양성(+3)', 'risk'],
-  ])('%s을 %s으로 판정한다', (measurement, expected) => {
-    expect(determineCheckupStatus(measurement, 'proteinuria', PROTEINURIA_REFERENCES)).toBe(
-      expected,
-    );
-  });
+describe('문구형 검진 결과 배지', () => {
+  test.each(TEXT_BADGE_CASES)(
+    '$caseName는 원문 라벨을 사용한다',
+    ({ measurement, field, references, expectedStatus, expectedLabel }) => {
+      expect(getCheckupStatusBadge(measurement, field, references)).toEqual({
+        status: expectedStatus,
+        label: expectedLabel,
+      });
+    },
+  );
 
-  test.each(['', '양성', '+1', '미검사'])('%s은 판정 불가다', (measurement) => {
-    expect(determineCheckupStatus(measurement, 'proteinuria', PROTEINURIA_REFERENCES)).toBe(
-      'unknown',
-    );
-  });
-});
-
-describe('흉부 X선 상태 판정 회귀', () => {
-  test.each(['정상', '비활동성'])('%s은 정상으로 판정한다', (measurement) => {
-    expect(determineCheckupStatus(measurement, 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe(
-      'normal',
-    );
-  });
-
-  test.each(['폐결핵 의심', '기타 흉부질환'])('%s은 위험으로 판정한다', (measurement) => {
-    expect(determineCheckupStatus(measurement, 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe(
-      'risk',
-    );
-  });
-
-  test('빈 값은 판정 불가다', () => {
-    expect(determineCheckupStatus('', 'chestXrayResult', CHEST_XRAY_REFERENCES)).toBe('unknown');
-  });
-
-  test('질환의심 기준 문구가 달라지면 추측하지 않는다', () => {
-    const references = [
-      { ...createReference('정상(A)', ''), chestXrayResult: '정상, 비활동성' },
-      { ...createReference('질환의심', ''), chestXrayResult: '그 외' },
-    ];
-
-    expect(determineCheckupStatus('폐결핵 의심', 'chestXrayResult', references)).toBe('unknown');
-  });
-
-  test('정상 기준이 비어 있으면 추측하지 않는다', () => {
-    const references = [
-      { ...createReference('정상(A)', ''), chestXrayResult: '' },
-      { ...createReference('질환의심', ''), chestXrayResult: '정상 및 비활동성이외의자' },
-    ];
-
-    expect(determineCheckupStatus('폐결핵 의심', 'chestXrayResult', references)).toBe('unknown');
+  test('빈 문구는 판정 불가로 표시한다', () => {
+    expect(getCheckupStatusBadge('', 'proteinuria', PROTEINURIA_REFERENCES)).toEqual({
+      status: 'unknown',
+      label: '판정 불가',
+    });
   });
 });

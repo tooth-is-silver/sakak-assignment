@@ -18,5 +18,11 @@ export {
   type CheckupResult,
 } from './api/schema';
 export { parseNumericReference, type ReferenceRange } from './model/reference';
-export { determineCheckupStatus, type CheckupStatus, type MeasurementField } from './model/status';
+export {
+  determineCheckupStatus,
+  getCheckupStatusBadge,
+  type CheckupStatus,
+  type CheckupStatusBadge,
+  type MeasurementField,
+} from './model/status';
 export { getCheckupErrorMessage } from './model/errorMessage';

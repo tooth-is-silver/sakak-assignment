@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "npm run dev --workspace web",
     "build": "npm run build --workspace web",
+    "algorithm": "npm run start --workspace algorithm --",
     "test": "npm test --workspaces",
     "test:algorithm": "npm test -w algorithm",
     "test:web": "npm test -w web",

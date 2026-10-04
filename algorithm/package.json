@@ -2,6 +2,7 @@
   "name": "algorithm",
   "private": true,
   "scripts": {
+    "start": "tsx src/cli.ts",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."

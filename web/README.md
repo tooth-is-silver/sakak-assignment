@@ -1,73 +1,227 @@
-# React + TypeScript + Vite
+# 개인 맞춤형 건강 분석 대시보드
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CANDiY 건강검진 정보 조회 API의 2단계 인증을 거쳐 최근 건강검진 결과와 과거 검진 이력을 보여주는 React 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 실행 방법
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 요구 환경
 
-## React Compiler
+- Node.js 20.19 이상
+- npm 10 이상
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 설치 및 목 데이터 실행
 
-## Expanding the ESLint configuration
+저장소 루트에서 실행합니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+`npm run dev` → `.env.development`의 목 환경 설정 로드 → 로그인 → 개인정보 입력값 클라이언트 검증 → 목 1차 응답으로 인증 대기 화면 이동 → `인증 완료` 선택 → 목 건강검진 결과 출력
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+로컬 목 실행에서는 실제 간편인증과 CANDiY API를 호출하지 않습니다. 로그인 입력값은 `sakak`, `sakak1234`로 미리 채워져 있어 로그인 버튼을 바로 누를 수 있습니다.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+### 실제 API 확인
+
+실제 CANDiY 1차·2차 요청과 카카오톡 인증은 아래 배포 주소에서 확인하는 것을 권장합니다.
+
+[배포된 건강검진 대시보드](https://sakak-assignment-zeta.vercel.app/)
+
+API Key는 Vercel Function의 서버 환경 변수로만 사용하며 클라이언트 번들에는 포함하지 않습니다.
+
+### 검사 명령
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
+
+## 주요 기능
+
+- 개인정보 입력 후 1차 간편인증 요청
+- 사용자가 간편인증을 완료한 뒤 2차 검진 결과 요청
+- 가장 최근 검진 결과 대시보드
+- 범위형 수치의 상태 시각화와 문구형 결과의 원문 표시
+- 날짜별 과거 건강검진 이력
+- 로딩·오류·빈 상태와 처음부터 다시 진행하는 복구 흐름
+- 목 로그인, 새로고침 세션 유지, 비로그인 접근 제한
+
+실제 CANDiY 1차·2차 요청과 카카오톡 인증, 최근 결과와 과거 이력 표시까지 확인했습니다.
+
+## 사용 기술
+
+- React 19, TypeScript, Vite
+- Tailwind CSS 4
+- TanStack Query
+- Zod
+- Vitest
+- Vercel Functions
+
+## 요구사항 구현 현황
+
+| 요구사항               | 상태 | 구현 내용                                                          |
+| ---------------------- | ---- | ------------------------------------------------------------------ |
+| TypeScript             | 완료 | API 요청·응답, 상태, 화면 전반에 적용                              |
+| React                  | 완료 | Client SPA와 React Router 기반 화면 구성                           |
+| Tailwind CSS           | 완료 | 반응형 폼·대시보드·이력 화면 구현                                  |
+| CANDiY API 연동        | 완료 | Vercel Function에서 API Key를 붙여 요청                            |
+| 1차·2차 인증           | 완료 | 개인정보 입력, 인증 대기, 인증 완료 후 결과 요청                   |
+| 최근 건강검진 대시보드 | 완료 | 가장 최근 `overviewList`와 판정 기준을 연결해 9개 항목 표시        |
+| 건강 상태 시각화       | 완료 | 범위형 수치는 상태 색상, 문구형 결과는 원문과 중립 색상으로 표시   |
+| 과거 이력 리스트       | 완료 | 일반검진·암검진·구강검진을 날짜순으로 모두 표시                    |
+| 로딩·오류·빈 상태      | 완료 | 중복 요청 방지, 사용자 오류 문구, 통합 빈 상태, 처음부터 다시 흐름 |
+| 반응형 UI              | 완료 | 모바일 단일 열, 태블릿·데스크톱 다단 구성                          |
+| Mock 로그인            | 완료 | 기본 계정, 새로고침 세션 유지, 비로그인 라우트 보호, 로그아웃      |
+| 테스트                 | 완료 | 스키마·요청 변환·판정·대시보드·오류 문구 회귀 테스트               |
+| API 실제 응답 차이     | 완료 | 숫자형 `caseType`, 유아 검진 배열과 추가 필드 반영                 |
+| 배포                   | 완료 | Vercel 배포와 SPA 직접 진입 rewrite 적용                           |
+
+## 강조한 설계 판단
+
+### API Key는 서버에서만 사용
+
+`VITE_`로 시작하는 환경 변수는 빌드 결과물에 포함되어 브라우저에서 확인할 수 있습니다. 이를 피하기 위해 브라우저는 같은 주소의 `/api/checkup`만 호출하고, `web/api/checkup.ts`의 Vercel Function이 서버에서 CANDiY API Key를 붙입니다. 같은 도메인 안에서 요청하므로 별도의 CORS 설정도 필요하지 않습니다.
+
+### 과제 확인용 로그인
+
+로그인은 가점 요소를 확인하기 위한 목 기능입니다. 입력값은 `sakak`, `sakak1234`로 미리 채워 면접관이 별도로 복사하지 않아도 바로 로그인할 수 있습니다. 로그인 요청은 `/api/login`으로 보내고 서버에서 계정을 확인합니다.
+
+로그인 후에는 비밀번호가 아닌 사용자 정보와 목 세션 값만 `localStorage`에 저장합니다. 앱이 시작될 때 저장값을 Zod로 다시 검사하며 형식이 다르면 폐기합니다. 비로그인 상태에서 `/` 또는 `/checkup`으로 접근하면 `/login`으로 이동하고, 로그아웃하면 저장된 세션을 삭제합니다.
+
+실제 만료·서명 검증이 있는 인증 서버는 아니므로 보안 인증 수단으로 사용할 수 없습니다. 과제에서 요구한 Mock 로그인과 화면 접근 흐름을 확인하기 위한 구현입니다.
+
+### 서버 응답을 변환하지 않고 검사
+
+서버 응답은 Zod의 `safeParse`로 검사합니다. 문자열 숫자를 숫자로 자동 변환하는 방식은 사용하지 않습니다. API가 계약과 다른 값을 보내면 조용히 통과시키지 않고 오류로 드러내기 위해서입니다.
+
+### 외부 API 오류를 사용자 문구로 변환
+
+CANDiY가 반환한 오류 메시지와 서버 설정 정보는 화면에 그대로 표시하지 않습니다. 실제로 확인한 오류 코드만 사용자가 다음 행동을 알 수 있는 문구로 바꾸고, 확인하지 못한 코드·네트워크 오류·응답 계약 오류는 고객센터 문의 문구로 통일합니다. 2차 인증 요청이 실패하면 같은 요청을 반복하지 않고 `처음부터 다시`를 통해 개인정보 입력 단계로 돌아갑니다.
+
+### 판정 기준을 임의로 만들지 않음
+
+숫자와 혈압처럼 `referenceList`에 범위와 비교 조건이 명시된 항목은 해당 기준을 그대로 계산해 정상·주의·위험 상태를 시각화합니다. 기준 문구를 읽을 수 없거나 측정값이 비어 있으면 `판정 불가`로 표시합니다.
+
+요단백과 흉부 X선처럼 문구로 제공되는 결과는 프론트엔드가 문구 사이의 위험도 우선순위를 임의로 정하지 않습니다. 어떤 결과를 주의나 위험으로 강조할지는 의학적 근거뿐 아니라 사용자의 다음 행동을 정의하는 도메인·사업·UX 정책 합의가 필요하며, 프론트엔드에서 단독으로 확정하기 어렵다고 판단했습니다. `정상(A)` 기준과 정확히 일치하는 문구만 정상 색상으로 표시하고, 그 외에는 실제 결과 문구를 밝은 회색 배지에 그대로 보여줍니다.
+
+### UI 설계 방향
+
+실제 건강검진 앱과 웹 서비스의 정보 구조를 참고하되, 사용자가 건강검진 서류를 간단히 전달받아 확인하는 상황을 기준으로 화면을 구성했습니다. 건강 정보는 빠르게 훑고 정확히 읽는 것이 중요하다고 판단해 화려한 그래프나 장식적인 인터랙션보다 명확한 제목, 충분한 여백, 읽기 쉬운 수치와 상태 구분을 우선했습니다.
+
+최근 검진 결과는 항목별 수치와 상태를 카드로 구분하고, 과거 검진 이력은 날짜·검진 종류·기관을 비교하기 쉬운 표로 정리했습니다. 범위로 판정한 상태는 색상과 텍스트를 함께 표시하고, 문구형 결과는 원문을 중립 색상으로 표시해 가장 단순하고 가독성 높은 형태를 목표로 했습니다.
+
+### 대시보드 항목 선정
+
+최근 검진 대시보드는 다음 9개 항목을 우선 보여줍니다.
+
+- BMI
+- 공복혈당
+- AST
+- ALT
+- GFR
+- 혈청크레아티닌
+- 혈압
+- 요단백
+- 흉부 X선
+
+콜레스테롤 4종은 제공된 응답에서 측정값이 비어 있고, 허리둘레는 기준이 성별에 따라 달라지지만 응답에 성별이 없어 제외했습니다. 시력·청력은 기준이 비어 있고, 골밀도는 다른 형태의 기준을 사용하므로 이번 대시보드 범위에서 제외했습니다.
+
+### 두 번의 인증 요청에서 입력값 유지
+
+건강검진 조회는 같은 주소로 두 번 요청합니다. 1차 요청은 간편인증을 발송하고, 사용자가 인증을 마친 뒤 2차 요청이 실제 검진 결과를 가져옵니다. 2차 요청에서 1차 요청의 입력값이 달라지면 `VE-007` 오류가 발생하므로 최초 요청 내용을 보관했다가 그대로 재사용합니다.
+
+### 인증 취소 UI 제외
+
+CANDiY API는 `isContinue: "0"` 요청으로 진행 중인 인증을 취소할 수 있습니다. 취소 UI도 검토했지만, 간편인증은 서버에서 4분 30초 후 만료되므로 이번 구현 범위에서는 별도 취소 버튼과 클라이언트 타이머를 제공하지 않습니다. 인증이 종료되기 전에 같은 정보로 다시 요청하면 이미 처리 중인 요청을 뜻하는 `AE-009` 오류가 발생할 수 있다는 한계가 있습니다.
+
+### 확인된 외부 API 동작
+
+실제 연동 환경에서 통신사 선택값을 다르게 보내도 카카오톡 간편인증 요청이 발송되는 현상을 확인했습니다. 클라이언트는 사용자가 선택한 통신사 값을 요청에 포함하고 있으므로 현재 확인 범위에서는 프론트엔드 구현 오류보다 CANDiY API의 통신사 검증 방식 또는 연동된 인증 서비스의 동작일 가능성이 높다고 판단했습니다. 다만 외부 API 내부 검증 과정은 확인할 수 없어 원인을 확정하지 않았으며, 실제 서비스라면 API 제공사에 요청 로그와 함께 문의해 검증해야 합니다.
+
+### 구현 범위와 향후 개선
+
+이번 과제에서는 개인정보 입력, 인증 대기, 결과 조회를 한 페이지 안의 상태 전환으로 구현했습니다. 제한된 기간 안에 1차·2차 인증 요청과 결과 화면까지 전체 흐름을 안정적으로 확인하는 데 우선순위를 두었습니다.
+
+시간이 더 주어진다면 일반적인 간편인증 경험처럼 인증 절차를 별도 팝업이나 모달로 분리하고 싶습니다. 팝업에서 인증 진행 상태가 바뀌면 본문 페이지가 그 변경을 확인하고, 인증 완료 상태가 검증된 뒤 건강검진 데이터를 요청하도록 개선할 수 있습니다. 이때 팝업 차단, 사용자의 팝업 종료, 인증 만료, 본문 페이지와 팝업 사이의 상태 동기화 실패까지 복구 가능한 흐름으로 함께 설계해야 합니다.
+
+### 최근 10년 조회
+
+CANDiY는 최근 10년간 국민건강보험공단에서 실시한 일반건강검진·암검진·구강검진 정보를 제공합니다. 조회 시작·종료 연도는 이 범위에서 선택하며, 응답의 `resultList`는 검진 종류를 제외하지 않고 날짜순으로 모두 표시합니다.
+
+### 제한된 호출량 대응
+
+CANDiY 무료 등급은 월 호출 횟수가 제한되어 있어 개발 중에는 `web/public/mock/first.json`과 `second.json`을 사용합니다. 목 데이터도 실제 응답과 같은 스키마 검사를 거칩니다.
+
+TanStack Query의 자동 재시도도 껐습니다. 한 번의 실패가 사용자 의도와 관계없이 여러 API 호출로 늘어나는 것을 막기 위해서입니다. 실제 응답은 대부분 정상 값이라 목 데이터에서는 정상·주의·위험 상태를 모두 확인할 수 있도록 개인정보가 아닌 샘플 수치를 사용합니다.
+
+배포된 서버 함수에는 별도의 호출 횟수 제한을 두지 않았습니다. 안정적인 제한을 구현하려면 외부 저장소나 배포 플랫폼의 요청 제한 기능이 필요하지만, 단기간 확인하는 구현 과제의 범위를 벗어난다고 판단했습니다. 실제 서비스라면 사용자별 또는 IP별 제한과 서버에서 검증하는 세션을 함께 적용해야 합니다.
+
+### 데이터 목록의 역할 구분
+
+- `overviewList`: 일반 건강검진의 측정값과 판정 기준을 연결해 최근 대시보드에 사용
+- `resultList`: 암 검진을 포함한 전체 검진 이력을 과거 이력 화면에 사용
+
+두 목록의 개수와 의미가 다르므로 배열 위치만으로 서로 연결하지 않습니다.
+
+### 읽기 쉬운 판정 타입
+
+`미만`, `이하`, `이상`, `초과`, `범위`를 `kind` 값으로 구분합니다. 각 경우에 필요한 값이 다르기 때문에 분기를 빠뜨리거나 잘못된 값을 사용하는 실수를 TypeScript가 발견할 수 있습니다. FHIR의 `low`·`high` 형태도 검토했지만, 이번 과제에서는 모든 판정 형태를 빠짐없이 처리하는 것이 더 중요하다고 판단했습니다.
+
+## API 문서와 실제 응답의 차이
+
+실제 API 호출에서 필드 이름과 타입만 확인하고, 개인정보와 건강수치는 저장소에 포함하지 않았습니다.
+
+| 항목                 | 문서와 다른 실제 응답              |
+| -------------------- | ---------------------------------- |
+| `caseType`           | 문자열이 아닌 숫자                 |
+| `infantsCheckupList` | 문서에는 없지만 빈 배열로 포함     |
+| `infantsDentalList`  | 문서에는 없지만 빈 배열로 포함     |
+| `waist`              | 문서의 `waists`가 아닌 단수형 이름 |
+| `checkupFindings`    | 문서에는 없지만 응답에 포함        |
+
+스키마는 문서가 아니라 확인한 실제 응답 형태를 기준으로 작성했습니다.
+
+## 데이터 검증 범위와 한계
+
+실제 인증과 조회는 한 사람의 건강검진 데이터로만 확인했습니다. 현재 스키마와 목 데이터는 이 응답에서 개인정보를 제거하고 일부 수치를 테스트용으로 바꾼 뒤, CANDiY API 명세를 함께 참고해 작성했습니다. 따라서 확인한 응답에는 정확히 대응하지만, 다른 사용자의 검진 종류·검진 기관·검진 시기·성별에 따라 달라지는 모든 형태를 확인한 것은 아닙니다.
+
+이는 현재 구현이 잘못 동작한다는 의미가 아니라 검증에 사용한 실제 데이터 표본이 제한된 데서 오는 한계입니다. 확인하지 못한 사용자의 응답에서는 목 데이터에 없는 값이나 스키마에 반영되지 않은 필드 형태가 들어올 수 있으며, 그에 따른 엣지 케이스와 예외 처리가 충분하지 않을 수 있습니다. 더 다양한 실제 응답을 안전하게 확보할 수 있다면 개인정보를 제거한 사례별 회귀 테스트를 먼저 추가하고, 스키마와 예외 처리를 점진적으로 보완해야 합니다.
+
+CANDiY 출력 명세에서는 `overviewList`와 `referenceList`가 본인정보인 경우에만 표시된다고 설명합니다. 각 검진 항목은 대부분 `String`으로만 정의되어 있고, 측정하지 않은 항목이 빈 문자열·필드 누락·다른 문구 중 어떤 형태로 오는지와 기관별 표기 차이는 구체적으로 설명하지 않습니다. 명세 예시도 실제 값을 가린 형태라 다음 경우는 추가 확인이 필요합니다.
+
+- 사용자에 따라 `overviewList` 또는 `referenceList`가 없거나 비어 있는 경우
+- 검사하지 않은 항목이 빈 문자열이 아닌 다른 형태로 오는 경우
+- 성별에 따라 기준이 달라지는 허리둘레·혈색소·감마지티피 항목
+- 검진 기관이나 검진 연도에 따라 측정값과 참고치 표기가 달라지는 경우
+- 일반검진 외 검진 종류에 따라 `resultList`의 항목과 부가 필드가 달라지는 경우
+- 현재 목 데이터에서 확인되지 않은 혈압·요단백·흉부 X선의 다른 측정값 표현
+
+확인하지 못한 형식을 추측해서 정상·주의·위험으로 표시하지 않습니다. 현재 스키마와 맞지 않는 응답은 검증 단계에서 실패시키고, 범위를 읽을 수 없거나 측정값이 비어 있으면 `판정 불가`로 처리합니다. 확인하지 못한 문구형 결과는 원문을 중립 색상으로 표시합니다. 이후 새로운 실제 응답 형태를 확인하면 개인정보를 제거한 필드 구조만 남기고, 해당 사례를 회귀 테스트에 먼저 추가한 뒤 스키마와 판정 로직을 보완할 계획입니다.
+
+## 폴더 구조
+
+```text
+web/
+├── api/       로그인과 API Key 보호를 담당하는 Vercel Function
+└── src/
+    ├── app/       앱 진입점과 전역 설정
+    ├── features/  로그인, 인증, 조회 같은 사용자 흐름
+    ├── entities/  검진 데이터, 판정 규칙, 표시 컴포넌트
+    └── shared/    도메인에 의존하지 않는 공통 코드
+```
+
+화면이 커졌다는 이유만으로 파일을 나누지 않고, 서로 다른 책임을 가진 영역만 분리합니다. 각 영역은 폴더 대표 파일인 `index.ts`를 통해 외부에 공개합니다.
+
+## 개인정보 보호
+
+실제 API 호출에는 실명, 병원명, 건강수치가 포함될 수 있습니다. 실제 응답 원본이나 실제 값을 코드, 문서, 커밋, 화면 캡처에 넣지 않습니다. 저장소의 목 데이터는 제출용으로 만든 샘플만 사용합니다.
+
+## 참고 문서
+
+- [CANDiY 개발 가이드](https://docs.candiy.io)
+- [TanStack Query 문서](https://tanstack.com/query/latest)
+- [Zod 문서](https://zod.dev)
+- [Vercel Functions 문서](https://vercel.com/docs/functions)
